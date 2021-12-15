@@ -44,7 +44,7 @@
 
 一些app限制同一账户同时登录的最大设备数量，例如，**Netflix**限制，每个付费账户最多同时在四个设备上登录。而用户可以通过**data-clone attack**，突破这种限制，具体过程如下所示：
 
-![image-20210810150451422](images/2021-08-10/image-20210810150451422.png)
+![image-20210810150451422](images/image-20210810150451422.png)
 
 对攻击者的能力的假设：攻击者可以完全控制受害者设备。
 
@@ -70,9 +70,9 @@
 
 作者从 **Google Play** 获得了 **114** 个热门安卓app，从**华为/小米应用市场**获得了 **120** 个热门安卓app，然后使用OEM-made phone clone app对这些app在手机间进行数据迁移。经过数据迁移之后，234个app中有131个app可以在新手机上成功被登录。
 
-![image-20210810151832549](images/2021-08-10/image-20210810151832549.png)
+![image-20210810151832549](images/image-20210810151832549.png)
 
-![image-20210810153258536](images/2021-08-10/image-20210810153258536.png)
+![image-20210810153258536](images/image-20210810153258536.png)
 
 ### 2.3 Device-Consistency Check
 
@@ -86,7 +86,7 @@
 
 作者利用设备属性编辑工具（device-attribute editing tool） **XxsqManager**（基于Xposed框架），通过API hooking编辑新设备的属性，让其保持与旧设备相同。 在这种情况下，**又有17个app**可以在新手机上成功被登录，如下所示：
 
-![image-20210810153326082](images/2021-08-10/image-20210810153326082.png)
+![image-20210810153326082](images/image-20210810153326082.png)
 
 剩余的一些app，例如支付宝、Apple Music等，可以检测到Xposed框架的存在。作者在下文中通过操作系统虚拟化的方法，进一步研究针对这些app的数据克隆攻击方案。
 
@@ -94,7 +94,7 @@
 
 ## 3. VPDROID SYSTEM DESIGN
 
-![image-20210810153424610](images/2021-08-10/image-20210810153424610.png)
+![image-20210810153424610](images/image-20210810153424610.png)
 
 作者提出的VPDroid系统是基于 **Cells** 虚拟化系统实现的。Cells是第一个在单个 Android 设备上**运行多个隔离的virtual phone (VP)**的轻量级的**操作系统级虚拟化**系统。
 
@@ -118,7 +118,7 @@
 
 针对在ServiceManager中注册过的service
 
-![image-20210810155029087](images/2021-08-10/image-20210810155029087.png)
+![image-20210810155029087](images/image-20210810155029087.png)
 
 **Binder 是 Android 中的进程间通信（IPC）机制。**
 
@@ -128,7 +128,7 @@
 
 针对未在ServiceManager中注册的service
 
-![image-20210810162616493](images/2021-08-10/image-20210810162616493.png)
+![image-20210810162616493](images/image-20210810162616493.png)
 
 在主机的Radio Interface Layer，作者在 **RILJ**（位于application framework层的一个API）和 **RilD** （位于Libraries层的一个daemon，用于处理调制解调控制请求）之间创建了一个名为 **RiLD** 的代理，并在该代理中创建了两个socket， 一个socket**连接到** **VP 的 RILJ**，另一个socket**连接到Host系统的RILJ**。 
 
@@ -138,7 +138,7 @@
 
 VPDroid系统允许使用者定制VP的属性，作者将这些属性分为三类：**Android system properties**、**user-level-virtualized device properties** 和 **kernel-level-virtualized device properties**。用户预先在配置文件**“build.VPDroid.prop”**中保存这些属性。对不同的属性，VPDroid系统有不同的定制方法，其整体结构如下：
 
-![image-20210810173109749](images/2021-08-10/image-20210810173109749.png)
+![image-20210810173109749](images/image-20210810173109749.png)
 
 - **Android System Properties**： 如brand、Serial Number、 IMEI、Android ID等，均为常量值，用于描述手机的配置信息。在 VP 启动时，VPDroid**强制 VP 的 init 进程**将用户预先给出的 **Android System Properties**从“build.VPDroid.prop”加载到 VP 的**共享内存空间**中。
 
@@ -174,7 +174,7 @@ VPDroid 可以模拟 101 种安卓设备的环境配置。
 
 测试结果如下：（图 8(a) 至 图 8(d) 经过了标准化，展示了VP在时耗方面的overhead）
 
-![image-20210810175134777](images/2021-08-10/image-20210810175134777.png)
+![image-20210810175134777](images/image-20210810175134777.png)
 
 其中，如**图 8(e) 和图 8(f)**所示，VP 的内存使用量少于Host，这是因为VP的kernel service的主存消耗都发生在了Host设备上。
 
@@ -186,8 +186,8 @@ VPDroid 可以模拟 101 种安卓设备的环境配置。
 
 经过实验，作者设计的攻击方案，针对全部的234 个app，均可完成数据克隆攻击。
 
-![image-20210810180015832](images/2021-08-10/image-20210810180015832.png)
+![image-20210810180015832](images/image-20210810180015832.png)
 
 涉及到的相关漏洞如下
 
-![image-20210810180051137](images/2021-08-10/image-20210810180051137.png)
+![image-20210810180051137](images/image-20210810180051137.png)
